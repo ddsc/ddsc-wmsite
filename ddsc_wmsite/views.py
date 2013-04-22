@@ -5,6 +5,9 @@ from __future__ import print_function
 from django.http import HttpResponse
 from django.core.exceptions import PermissionDenied
 from django.conf import settings
+import urllib
+import cStringIO
+
 
 gs_setting = getattr(settings, 'IMPORTER_GEOSERVER')
 
@@ -20,6 +23,10 @@ def showshow(request):
     new_req_string = request_string + '&viewparams=usr:'
     new_req_string += user_name
 
-    new_url = host + '/' + work_space + '/' + new_req_string
+    new_url = host + '/' + work_space + new_req_string
     new_url = new_url.replace('/?', '?')
-    return HttpResponse('<img src="' + new_url + '" />')
+    f = urllib.urlopen(new_url)
+    stream = cStringIO.StringIO(f.read())
+    format_string = request.GET.get('format')
+
+    return HttpResponse(stream.read(), mimetype=format_string)
